@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notion TODO</title>
+    <style>
+        html, body {
+            height: 500px;
+            width: 350px;
+            padding: 0;
+            margin: 0;
+        }
+
+        .title, .bottom {
+            text-align: center;
+            font-weight: bold;
+            font-size: 16px;
+            padding: 10px 0;
+        }
+
+        .title {
+            top: 0;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .bottom {
+            bottom: 0;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .contents {
+            display: absolute;
+            top: 30px;
+            height: 430px;
+            padding: 5px 20px;
+        }
+        
+        .content {
+            display: flex;
+            align-items: start;
+            justify-content: start;
+        }
+
+        label {
+            padding-left: 5px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="title">
+        <p>체크리스트</p>
+    </div>
+    <div class="contents">
+        <div class="content">
+            <input id="checkbox1" type="checkbox"> <label for="checkbox1">내용</label>
+        </div>
+        <div class="content">
+            <input id="checkbox2" type="checkbox"> <label for="checkbox2">내용</label>
+        </div>
+    </div>
+    <div class="bottom">
+        바닥엔 뭘 넣으면 좋을까요?
+    </div>
+</body>
+<script src="popup.js"></script>
+</html>
