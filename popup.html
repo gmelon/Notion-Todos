@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Notion 할일 리스트</title>
+    <style>
+      body {
+        width: 300px;
+        padding: 10px;
+        font-family: Arial, sans-serif;
+      }
+      ul {
+        list-style-type: none;
+        padding: 0;
+      }
+      li {
+        margin-bottom: 5px;
+        display: flex;
+        align-items: flex-start;
+      }
+      input[type="checkbox"] {
+        margin-right: 5px;
+        margin-top: 3px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Notion 할일 리스트</h1>
+    <ul id="todoList"></ul>
+    <script src="popup.js"></script>
+  </body>
+</html>
