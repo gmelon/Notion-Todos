@@ -1,20 +1,15 @@
 {
   "manifest_version": 3,
-  "name": "Notion 할일 리스트",
+  "name": "Notion Todo",
   "version": "1.0",
-  "description": "노션 페이지의 할일블럭 내용을 크롬 확장 프로그램에서 보여줍니다.",
-  "permissions": ["activeTab", "storage"],
-  "action": {
-    "default_popup": "popup.html"
-  },
-  "background": {
-    "service_worker": "background.js"
-  },
+  "description": "노션 페이지의 할 일 목록을 모달로 표시",
+  "permissions": ["activeTab"],
+  "host_permissions": ["*://*.notion.so/*"],
   "content_scripts": [
     {
-      "matches": ["https://*.notion.so/*"],
-      "js": ["content.js"],
-      "css": ["content.css"]
+      "matches": ["*://*.notion.so/*"],
+      "css": ["modal.css"],
+      "js": ["content.js"]
     }
   ]
 }

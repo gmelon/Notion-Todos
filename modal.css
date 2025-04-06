@@ -1,0 +1,86 @@
+.notion-todo-ext-button {
+  background: transparent;
+  border: 1px solid var(--color-text-default);
+  color: var(--color-text-default);
+  padding: 4px 12px;
+  border-radius: 3px;
+  margin: 0 8px;
+  cursor: pointer;
+  font-size: 14px;
+  height: 28px;
+}
+
+.notion-todo-ext-button:hover {
+  background: rgba(55, 53, 47, 0.08);
+}
+
+.notion-todo-ext-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(15, 15, 15, 0.6);
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notion-todo-ext-modal-content {
+  background: white;
+  border-radius: 4px;
+  min-width: 320px;
+  max-width: 550px;
+  max-height: 85vh;
+  width: 90%;
+  box-shadow: rgb(15 15 15 / 5%) 0px 0px 0px 1px,
+    rgb(15 15 15 / 10%) 0px 3px 6px, rgb(15 15 15 / 20%) 0px 9px 24px;
+}
+
+.notion-todo-ext-modal-header {
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+.notion-todo-ext-modal-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.notion-todo-ext-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: rgb(55, 53, 47);
+  padding: 0;
+}
+
+.notion-todo-ext-modal-body {
+  padding: 14px;
+  max-height: calc(85vh - 100px);
+  overflow-y: auto;
+}
+
+.notion-todo-ext-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+}
+
+.notion-todo-ext-item input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+}
+
+.notion-todo-ext-empty {
+  color: rgba(55, 53, 47, 0.5);
+  text-align: center;
+  padding: 20px 0;
+}
