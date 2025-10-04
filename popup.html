@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        width: 320px;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+        background: linear-gradient(135deg, #079669 0%, #047857 100%);
+        color: #1f2937;
+      }
+
+      .header {
+        background: white;
+        padding: 24px 20px;
+        text-align: center;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      }
+
+      .logo {
+        display: block;
+        width: 48px;
+        height: 48px;
+        margin: 0 auto 12px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      }
+
+      .title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #111827;
+        margin-bottom: 4px;
+      }
+
+      .subtitle {
+        font-size: 13px;
+        color: #6b7280;
+      }
+
+      .content {
+        background: white;
+        padding: 20px;
+      }
+
+      .setting-item {
+        margin-bottom: 20px;
+      }
+
+      .setting-item:last-child {
+        margin-bottom: 0;
+      }
+
+      label {
+        display: block;
+        font-weight: 600;
+        font-size: 13px;
+        color: #374151;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      select {
+        width: 100%;
+        padding: 10px 12px;
+        margin-top: 4px;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 14px;
+        background: white;
+        color: #1f2937;
+        cursor: pointer;
+        transition: all 150ms ease;
+        outline: none;
+      }
+
+      select:hover {
+        border-color: #079669;
+      }
+
+      select:focus {
+        border-color: #079669;
+        box-shadow: 0 0 0 3px rgba(7, 150, 105, 0.1);
+      }
+
+      .toggle-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px;
+        background: #f9fafb;
+        border-radius: 8px;
+        margin-top: 4px;
+        transition: background 150ms ease;
+      }
+
+      .toggle-container:hover {
+        background: #f3f4f6;
+      }
+
+      .toggle-label {
+        font-size: 14px;
+        color: #374151;
+        font-weight: 500;
+      }
+
+      .toggle-switch {
+        position: relative;
+        width: 48px;
+        height: 26px;
+        background: #d1d5db;
+        border-radius: 13px;
+        cursor: pointer;
+        transition: background 200ms ease;
+        flex-shrink: 0;
+      }
+
+      .toggle-switch.active {
+        background: #079669;
+      }
+
+      .toggle-slider {
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 20px;
+        height: 20px;
+        background: white;
+        border-radius: 50%;
+        transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      .toggle-switch.active .toggle-slider {
+        transform: translateX(22px);
+      }
+
+      .footer {
+        padding: 16px 20px;
+        background: white;
+        border-top: 1px solid rgba(0, 0, 0, 0.06);
+      }
+
+      button {
+        width: 100%;
+        background: linear-gradient(135deg, #079669 0%, #047857 100%);
+        color: white;
+        border: none;
+        padding: 12px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 15px;
+        font-weight: 600;
+        transition: all 150ms ease;
+        box-shadow: 0 2px 4px rgba(7, 150, 105, 0.2);
+      }
+
+      button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(7, 150, 105, 0.3);
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      button.saved {
+        background: #10b981;
+      }
+
+      .info-text {
+        font-size: 12px;
+        color: #6b7280;
+        margin-top: 4px;
+        font-weight: 400;
+      }
+
+      .language-display {
+        padding: 12px;
+        background: #f9fafb;
+        border-radius: 8px;
+        margin-top: 8px;
+        font-size: 14px;
+        color: #374151;
+        font-weight: 500;
+        text-align: center;
+        border: 2px solid #e5e7eb;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <img src="logo.png" alt="Notion To-dos" class="logo" />
+      <div class="title">Notion To-dos</div>
+      <div class="subtitle" data-i18n="settings">Settings</div>
+    </div>
+
+    <div class="content">
+      <div class="setting-item">
+        <label data-i18n="displayOptions">Display Options</label>
+        <div class="toggle-container">
+          <span class="toggle-label" data-i18n="showTodoCount">Show todo count</span>
+          <div class="toggle-switch" id="showCount">
+            <div class="toggle-slider"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="setting-item">
+        <label data-i18n="language">Language</label>
+        <div class="info-text" data-i18n="autoDetected">
+          Automatically detected from Chrome settings
+        </div>
+        <div class="language-display" id="currentLanguage">
+          Loading...
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <button id="save" data-i18n="saveSettings">Save Settings</button>
+    </div>
+
+    <script src="locales.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

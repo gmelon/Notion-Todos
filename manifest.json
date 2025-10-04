@@ -1,15 +1,21 @@
 {
   "manifest_version": 3,
-  "name": "Notion Todo",
-  "version": "1.0",
-  "description": "노션 페이지의 할 일 목록을 모달로 표시",
-  "permissions": ["activeTab"],
+  "name": "__MSG_appName__",
+  "version": "1.1",
+  "description": "__MSG_appDesc__",
+  "default_locale": "en",
+  "permissions": ["storage", "tabs"],
   "host_permissions": ["*://*.notion.so/*"],
+  "icons": { "128": "logo.png" },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "logo.png"
+  },
   "content_scripts": [
     {
       "matches": ["*://*.notion.so/*"],
       "css": ["modal.css"],
-      "js": ["content.js"]
+      "js": ["locales.js", "content.js"]
     }
   ]
 }

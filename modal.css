@@ -23,8 +23,9 @@
   background: rgba(15, 15, 15, 0.6);
   z-index: 999999;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
+  padding-top: 80px;
 }
 
 .notion-todo-ext-modal-content {
@@ -32,10 +33,13 @@
   border-radius: 4px;
   min-width: 320px;
   max-width: 550px;
-  max-height: 85vh;
   width: 90%;
+  display: flex;
+  flex-direction: column;
+  max-height: 85vh;
   box-shadow: rgb(15 15 15 / 5%) 0px 0px 0px 1px,
     rgb(15 15 15 / 10%) 0px 3px 6px, rgb(15 15 15 / 20%) 0px 9px 24px;
+  position: relative;
 }
 
 .notion-todo-ext-modal-header {
@@ -44,6 +48,11 @@
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 1;
 }
 
 .notion-todo-ext-modal-header h3 {
@@ -63,8 +72,12 @@
 
 .notion-todo-ext-modal-body {
   padding: 14px;
-  max-height: calc(85vh - 100px);
   overflow-y: auto;
+  flex: 1;
+  min-height: 100px;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(85vh - 48px); /* 헤더 높이(48px)를 뺀 값 */
 }
 
 .notion-todo-ext-item {
@@ -83,4 +96,5 @@
   color: rgba(55, 53, 47, 0.5);
   text-align: center;
   padding: 20px 0;
+  margin: auto;
 }

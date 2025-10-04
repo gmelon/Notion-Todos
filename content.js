@@ -1,13 +1,121 @@
 class NotionTodoExtension {
   constructor() {
+    this.currentLanguage = "en";
     this.init();
   }
 
-  init() {
-    this.injectStyles();
-    this.waitForHeader().then(() => {
-      this.createButton();
-    });
+  async init() {
+    try {
+      // Detect browser language
+      this.currentLanguage = this.detectBrowserLanguage();
+
+      // Load saved settings
+      const result = await chrome.storage.sync.get(["showCount"]);
+      this.showCount = result.showCount !== undefined ? result.showCount : true;
+
+      this.injectStyles();
+      this.waitForHeader().then(() => {
+        this.createButton();
+      });
+
+      // storage 변경 감지
+      chrome.storage.onChanged.addListener((changes, namespace) => {
+        if (namespace === "sync" && changes.showCount !== undefined) {
+          this.showCount = changes.showCount.newValue;
+          this.updateUI();
+        }
+      });
+
+      // 메시지 리스너 (즉시 업데이트용)
+      chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+        if (message.type === "UPDATE_SETTINGS") {
+          if (message.showCount !== undefined) {
+            this.showCount = message.showCount;
+            this.updateUI();
+          }
+        }
+      });
+    } catch (error) {
+      console.error("Failed to initialize NotionTodoExtension:", error);
+    }
+  }
+
+  detectBrowserLanguage() {
+    // Get browser language from Chrome API
+    const browserLang = chrome.i18n.getUILanguage();
+
+    // Map browser language to supported languages
+    let detectedLang = browserLang.split('-')[0]; // Get base language (e.g., 'en' from 'en-US')
+
+    // Special handling for Chinese variants
+    if (browserLang === 'zh-TW' || browserLang === 'zh-HK') {
+      detectedLang = 'zh_TW';
+    } else if (browserLang.startsWith('zh')) {
+      detectedLang = 'zh';
+    }
+
+    // List of supported languages
+    const supportedLanguages = ['en', 'ko', 'ja', 'zh', 'zh_TW', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'vi', 'th', 'id', 'nl', 'pl', 'tr'];
+
+    // Fallback to English if not supported
+    if (!supportedLanguages.includes(detectedLang)) {
+      detectedLang = 'en';
+    }
+
+    return detectedLang;
+  }
+
+  getTranslation(key) {
+    try {
+      return translations[this.currentLanguage][key] || translations["en"][key];
+    } catch (error) {
+      console.error("Translation error:", error);
+      return translations["en"][key];
+    }
+  }
+
+  updateUI() {
+    try {
+      this.updateButtonText();
+
+      const modal = document.querySelector(".notion-todo-ext-modal");
+      if (modal) {
+        const todos = this.getTodos();
+        const completedCount = todos.filter(todo => todo.checked).length;
+        const totalCount = todos.length;
+
+        const header = modal.querySelector(".notion-todo-ext-modal-header");
+        if (header) {
+          if (this.showCount && totalCount > 0) {
+            header.textContent = `${this.getTranslation("todoList")} (${completedCount} / ${totalCount})`;
+          } else {
+            header.textContent = this.getTranslation("todoList");
+          }
+        }
+
+        const emptyState = modal.querySelector(".notion-todo-ext-empty");
+        if (emptyState) {
+          emptyState.textContent = this.getTranslation("noTodos");
+        }
+      }
+    } catch (error) {
+      console.error("UI update error:", error);
+    }
+  }
+
+  updateButtonText() {
+    const button = document.querySelector(".notion-todo-ext-button");
+    if (button) {
+      const todos = this.getTodos();
+      const completedCount = todos.filter(todo => todo.checked).length;
+      const totalCount = todos.length;
+
+      if (this.showCount && totalCount > 0) {
+        button.textContent = `${this.getTranslation("todoList")} (${completedCount} / ${totalCount})`;
+      } else {
+        button.textContent = this.getTranslation("todoList");
+      }
+    }
   }
 
   injectStyles() {
@@ -33,7 +141,7 @@ class NotionTodoExtension {
         line-height: 1.2;
         min-width: 0px;
         color: rgb(55, 53, 47);
-        margin: 0 2px;
+        margin: 0 2px 0 4px;
         border: none;
         background: transparent;
       }
@@ -67,6 +175,7 @@ class NotionTodoExtension {
         box-sizing: border-box;
         isolation: isolate;
         height: 100%;
+        padding-top: 0px !important;
         --safe-area-inset-top: env(safe-area-inset-top,0px);
         --safe-area-inset-right: env(safe-area-inset-right,0px);
         --safe-area-inset-left: env(safe-area-inset-left,0px);
@@ -227,14 +336,38 @@ class NotionTodoExtension {
 
   createButton() {
     const button = document.createElement("button");
-    button.textContent = "할 일 목록";
     button.className = "notion-todo-ext-button";
 
     const header = document.querySelector(".notion-topbar-share-menu");
     if (header) {
       header.parentElement.insertBefore(button, header);
       button.addEventListener("click", () => this.showModal());
+      this.updateButtonText();
+      this.observeTodoChanges();
     }
+  }
+
+  observeTodoChanges() {
+    let debounceTimer;
+
+    // 페이지의 체크박스 변경 감지
+    const observer = new MutationObserver(() => {
+      // 디바운싱: 100ms 내 여러 변경사항을 한 번에 처리
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        this.updateButtonText();
+      }, 100);
+    });
+
+    // 노션 페이지 전체를 관찰
+    const targetNode = document.querySelector('.notion-frame') || document.body;
+    observer.observe(targetNode, {
+      attributes: true,
+      attributeFilter: ['class', 'checked'],
+      childList: true,      // DOM 노드 추가/제거 감지
+      subtree: true,        // 모든 하위 요소 감지
+      characterData: true   // 텍스트 변경 감지
+    });
   }
 
   getTodos() {
@@ -285,6 +418,7 @@ class NotionTodoExtension {
     if (existingModal) {
       existingModal.style.opacity = "0";
       existingModal.style.transform = "scale(0.95)";
+      this.updateButtonText();
       setTimeout(() => existingModal.remove(), 120);
       return;
     }
@@ -310,9 +444,17 @@ class NotionTodoExtension {
     };
 
     updatePosition();
+
+    const completedCount = todos.filter(todo => todo.checked).length;
+    const totalCount = todos.length;
+
+    const headerText = this.showCount && totalCount > 0
+      ? `${this.getTranslation("todoList")} (${completedCount} / ${totalCount})`
+      : this.getTranslation("todoList");
+
     modal.innerHTML = `
       <div class="notion-todo-ext-modal-header">
-        할 일 목록
+        ${headerText}
       </div>
       <div class="notion-todo-ext-modal-body">
         ${
@@ -323,13 +465,15 @@ class NotionTodoExtension {
           <div class="notion-todo-ext-item" style="padding-left: ${
             todo.depth * 24 + 14
           }px" data-index="${index}">
-            <input type="checkbox" ${todo.checked ? "checked" : ""} disabled>
+            <input type="checkbox" ${todo.checked ? "checked" : ""}>
             <span>${todo.text}</span>
           </div>
         `
                 )
                 .join("")
-            : '<div class="notion-todo-ext-empty">할 일이 없습니다</div>'
+            : `<div class="notion-todo-ext-empty">${this.getTranslation(
+                "noTodos"
+              )}</div>`
         }
       </div>
     `;
@@ -344,16 +488,64 @@ class NotionTodoExtension {
 
     // 각 항목에 클릭 이벤트 추가
     modal.querySelectorAll(".notion-todo-ext-item").forEach((item) => {
-      item.style.cursor = "pointer";
-      item.addEventListener("click", () => {
-        const index = parseInt(item.dataset.index);
-        const todo = todos[index];
+      const checkbox = item.querySelector('input[type="checkbox"]');
+      const index = parseInt(item.dataset.index);
+      const todo = todos[index];
+
+      // 체크박스 클릭 이벤트
+      checkbox.addEventListener("change", (e) => {
+        e.stopPropagation();
         if (todo && todo.element) {
-          todo.element.scrollIntoView({
-            behavior: "smooth",
-            block: "center",
-            inline: "nearest",
-          });
+          const notionCheckbox = todo.element.querySelector(
+            'input[type="checkbox"]'
+          );
+          if (notionCheckbox) {
+            notionCheckbox.checked = checkbox.checked;
+            // 노션의 체크박스 상태 변경을 트리거
+            const clickEvent = new MouseEvent("click", {
+              bubbles: true,
+              cancelable: true,
+              view: window,
+            });
+            notionCheckbox.dispatchEvent(clickEvent);
+
+            // 노션의 체크박스 컨테이너에 active 클래스 토글
+            const checkboxContainer = notionCheckbox.closest(".pseudoHover");
+            if (checkboxContainer) {
+              if (checkbox.checked) {
+                checkboxContainer.classList.add("pseudoActive");
+              } else {
+                checkboxContainer.classList.remove("pseudoActive");
+              }
+            }
+
+            // 모달 헤더 카운트 업데이트
+            const allCheckboxes = modal.querySelectorAll('.notion-todo-ext-item input[type="checkbox"]');
+            const completedCount = Array.from(allCheckboxes).filter(cb => cb.checked).length;
+            const totalCount = allCheckboxes.length;
+            const header = modal.querySelector('.notion-todo-ext-modal-header');
+            if (header) {
+              header.textContent = `${this.getTranslation("todoList")} ${totalCount > 0 ? `(${completedCount} / ${totalCount})` : ''}`;
+            }
+
+            // 버튼 텍스트 업데이트
+            setTimeout(() => this.updateButtonText(), 100);
+          }
+        }
+      });
+
+      // 항목 클릭 이벤트 (체크박스 클릭은 제외)
+      item.style.cursor = "pointer";
+      item.addEventListener("click", (e) => {
+        // 체크박스 클릭이 아닌 경우에만 스크롤
+        if (!e.target.matches('input[type="checkbox"]')) {
+          if (todo && todo.element) {
+            todo.element.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+              inline: "nearest",
+            });
+          }
         }
       });
     });
@@ -368,6 +560,7 @@ class NotionTodoExtension {
       modal.style.opacity = "0";
       modal.style.transform = "scale(0.95)";
       window.removeEventListener("resize", updatePosition);
+      this.updateButtonText();
       setTimeout(() => {
         modal.remove();
         document.removeEventListener("mousedown", handleClick);
